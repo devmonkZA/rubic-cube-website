@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rubik's Cube Solver</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>Rubik's Cube Solver</h1>
+        <p class="subtitle">Scramble, solve, and step through every move</p>
+      </header>
+
+      <main>
+        <!-- 3D cube -->
+        <div id="cube-container">
+          <div id="cube-wrapper"></div>
+          <div id="cube-status" class="status-idle">Ready — click Scramble to begin</div>
+        </div>
+
+        <!-- Primary actions -->
+        <div class="control-row">
+          <button id="btn-scramble" class="btn btn-blue">&#x1F500; Scramble</button>
+          <button id="btn-solve" class="btn btn-green" disabled>&#x2728; Solve</button>
+        </div>
+
+        <!-- Step navigation -->
+        <div class="control-row nav-row" id="nav-row">
+          <button id="btn-prev" class="btn btn-nav" disabled>&#8592; Prev</button>
+          <span id="step-counter" class="step-counter">—</span>
+          <button id="btn-next" class="btn btn-nav" disabled>Next &#8594;</button>
+          <button id="btn-play" class="btn btn-play" disabled>&#9654; Play</button>
+        </div>
+
+        <!-- Solution info panel -->
+        <div id="solution-panel" class="hidden">
+          <div class="panel-row">
+            <span class="seq-label">Scramble:</span>
+            <span id="scramble-display" class="mono"></span>
+          </div>
+          <div id="solution-row" class="panel-row hidden">
+            <span class="seq-label">Solution (<span id="move-count"></span>):</span>
+            <div id="solution-chips" class="chips"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
