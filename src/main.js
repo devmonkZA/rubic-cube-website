@@ -18,6 +18,12 @@ const scrambleDisp  = $("scramble-display");
 const solutionRow   = $("solution-row");
 const solutionChips = $("solution-chips");
 const moveCount     = $("move-count");
+const nextMoveBox   = $("next-move-box");
+const nextMoveNote  = $("next-move-notation");
+const nextMoveHint  = $("next-move-hint");
+const nextMoveTip   = $("next-move-tip");
+const nextFaceSwatch = $("next-face-swatch");
+const faceGuide     = $("face-guide");
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let player         = null;
@@ -69,8 +75,69 @@ function showStep(n) {
   btnPrev.disabled = currentStep === 0;
   btnNext.disabled = currentStep === solutionMoves.length;
 
+  // Next move box
+  updateNextMove();
+
   // Chip highlighting
   renderChips();
+}
+
+const FACE_META = {
+  U: { name: "Top",    color: "#ffffff", border: true,  tip: "looking down at the cube" },
+  D: { name: "Bottom", color: "#ffd600", border: false, tip: "looking up at the cube from below" },
+  F: { name: "Front",  color: "#00c041", border: false, tip: "the green face facing you" },
+  B: { name: "Back",   color: "#0051c7", border: false, tip: "the blue face at the back" },
+  R: { name: "Right",  color: "#e8312a", border: false, tip: "the red face on the right side" },
+  L: { name: "Left",   color: "#ff7b00", border: false, tip: "the orange face on the left side" },
+};
+
+const DIR_TEXT = {
+  "":  ["clockwise",         "turn it like a clock when looking at it directly"],
+  "'": ["counter-clockwise", "turn it the opposite way to a clock"],
+  "2": ["180° half-turn",    "turn it twice (or halfway around)"],
+};
+
+function updateNextMove() {
+  if (solutionMoves.length === 0) { nextMoveBox.classList.add("hidden"); return; }
+  nextMoveBox.classList.remove("hidden");
+  nextMoveBox.classList.remove("solved");
+
+  // Clear all active-face highlights
+  document.querySelectorAll(".face-card").forEach(c => c.classList.remove("active-face"));
+
+  if (currentStep >= solutionMoves.length) {
+    nextMoveBox.classList.add("solved");
+    nextFaceSwatch.style.background = "var(--green)";
+    nextFaceSwatch.style.border = "none";
+    nextMoveNote.textContent = "✓";
+    nextMoveHint.textContent = "Cube is solved!";
+    nextMoveTip.textContent  = "";
+  } else {
+    const move    = solutionMoves[currentStep];
+    const letter  = move[0];
+    const suffix  = move.slice(1).replace(/\d+$/, m => m === "1" ? "" : m); // normalise
+    const sfx     = move.includes("'") ? "'" : move.match(/\d/) ? "2" : "";
+    const meta    = FACE_META[letter] ?? { name: letter, color: "#888", tip: "" };
+    const [dirShort, dirLong] = DIR_TEXT[sfx] ?? DIR_TEXT[""];
+
+    // Swatch
+    nextFaceSwatch.style.background   = meta.color;
+    nextFaceSwatch.style.borderColor  = meta.border ? "#555" : "rgba(255,255,255,0.15)";
+
+    nextMoveNote.textContent = move;
+    nextMoveHint.textContent = `${meta.name} face (${letter}) — ${dirShort}`;
+    nextMoveTip.textContent  = currentStep === 0
+      ? `Tip: rotate ${meta.tip}, ${dirLong} — then press Next`
+      : `Rotate ${meta.tip}, ${dirLong}`;
+
+    // Highlight matching face card in the guide
+    const card = document.querySelector(`.face-card[data-face="${letter}"]`);
+    if (card) card.classList.add("active-face");
+  }
+}
+
+function showFaceGuide() {
+  faceGuide.classList.remove("hidden");
 }
 
 function renderChips() {
@@ -101,6 +168,8 @@ async function doScramble() {
   currentStep   = 0;
   stepCounter.textContent = "—";
   solutionRow.classList.add("hidden");
+  nextMoveBox.classList.add("hidden");
+  faceGuide.classList.add("hidden");
 
   status("Generating scramble…", "loading");
   try {
@@ -142,6 +211,7 @@ async function doSolve() {
     moveCount.textContent = `${solutionMoves.length} moves`;
     solutionRow.classList.remove("hidden");
 
+    showFaceGuide();
     showStep(0);   // reset to scrambled start
     status(`Solution found — ${solutionMoves.length} moves. Use arrows or Play to step through.`, "ready");
     btnPlay.disabled = false;

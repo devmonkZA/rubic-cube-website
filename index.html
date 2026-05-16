@@ -34,6 +34,42 @@
           <button id="btn-play" class="btn btn-play" disabled>&#9654; Play</button>
         </div>
 
+        <!-- Next move box -->
+        <div id="next-move-box" class="hidden">
+          <div class="next-move-left">
+            <span class="next-label">Next move</span>
+            <div class="next-move-main">
+              <span id="next-face-swatch" class="face-swatch"></span>
+              <span id="next-move-notation">—</span>
+            </div>
+          </div>
+          <div class="next-move-right">
+            <p id="next-move-hint" class="next-hint"></p>
+            <p id="next-move-tip" class="next-tip"></p>
+          </div>
+        </div>
+
+        <!-- Face reference guide -->
+        <div id="face-guide" class="hidden">
+          <div class="guide-header">
+            <span class="guide-title">Face Reference</span>
+            <span class="guide-sub">Hold the cube with the <strong>green face towards you</strong> and <strong>white on top</strong></span>
+          </div>
+          <div class="face-grid">
+            <div class="face-card" data-face="U"><span class="fc-swatch" style="background:#ffffff;border:1px solid #555"></span><span class="fc-letter">U</span><span class="fc-name">Top</span></div>
+            <div class="face-card" data-face="D"><span class="fc-swatch" style="background:#ffd600"></span><span class="fc-letter">D</span><span class="fc-name">Bottom</span></div>
+            <div class="face-card" data-face="F"><span class="fc-swatch" style="background:#00c041"></span><span class="fc-letter">F</span><span class="fc-name">Front</span></div>
+            <div class="face-card" data-face="B"><span class="fc-swatch" style="background:#0051c7"></span><span class="fc-letter">B</span><span class="fc-name">Back</span></div>
+            <div class="face-card" data-face="R"><span class="fc-swatch" style="background:#e8312a"></span><span class="fc-letter">R</span><span class="fc-name">Right</span></div>
+            <div class="face-card" data-face="L"><span class="fc-swatch" style="background:#ff7b00"></span><span class="fc-letter">L</span><span class="fc-name">Left</span></div>
+          </div>
+          <div class="guide-legend">
+            <span><strong>No suffix</strong> = clockwise</span>
+            <span><strong>'</strong> (prime) = counter-clockwise</span>
+            <span><strong>2</strong> = half-turn (180°)</span>
+          </div>
+        </div>
+
         <!-- Solution info panel -->
         <div id="solution-panel" class="hidden">
           <div class="panel-row">
