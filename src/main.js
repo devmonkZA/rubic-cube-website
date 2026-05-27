@@ -242,7 +242,7 @@ async function stepBack() {
   updateNavButtons();
   try {
     await player.controller.animationController.play({
-      direction: -1, // backwards
+      direction: -1,
       untilBoundary: "move",
       autoSkipToOtherEndIfStartingAtBoundary: true,
     });
@@ -259,6 +259,7 @@ function jumpToStep(n) {
   stopPlay();
   currentStep = Math.max(0, Math.min(n, solutionMoves.length));
   player.timestamp = currentStep * moveDuration;
+  player.pause(); // setting timestamp can restart internal playback; re-pause to prevent it
   syncUI();
 }
 

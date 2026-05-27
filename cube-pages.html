@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rubik's Cube — Learn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0d;
+    --bg2: #141414;
+    --bg3: #1c1c1c;
+    --border: rgba(255,255,255,0.08);
+    --border-hover: rgba(255,255,255,0.18);
+    --text: #f0ede8;
+    --muted: #888;
+    --accent: #f5a623;
+    --accent2: #4ecdc4;
+    --accent3: #e85d75;
+    --white: #fff;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    /* Cube colors */
+    --cu: #f5f5f5;  /* white */
+    --cd: #f5e642;  /* yellow */
+    --cf: #3bba4c;  /* green */
+    --cb: #1a6cd4;  /* blue */
+    --cr: #e8323d;  /* red */
+    --cl: #f5821f;  /* orange */
+  }
+
+  html { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; }
+  body { min-height: 100vh; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,13,13,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0;
+    padding: 0 2rem;
+    height: 58px;
+  }
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    margin-right: 2rem;
+    white-space: nowrap;
+  }
+  .nav-links { display: flex; gap: 0; flex: 1; }
+  .nav-links button {
+    background: none; border: none; cursor: pointer;
+    font-family: var(--sans); font-size: 13.5px; font-weight: 400;
+    color: var(--muted);
+    padding: 0 1rem; height: 58px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.18s, border-color 0.18s;
+    white-space: nowrap;
+  }
+  .nav-links button:hover { color: var(--text); }
+  .nav-links button.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 500; }
+
+  /* ── PAGES ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 4rem 2rem 3rem;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-family: var(--mono);
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--white);
+    margin-bottom: 1rem;
+  }
+  .hero p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #a0a0a0;
+    max-width: 560px;
+  }
+
+  /* ── SECTION WRAPPER ── */
+  .content { max-width: 760px; margin: 0 auto; padding: 0 2rem 5rem; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--border-hover); }
+  .card h2 {
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 0.75rem;
+  }
+  .card h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+  .card p { font-size: 0.95rem; line-height: 1.7; color: #b0b0b0; }
+  .card p + p { margin-top: 0.6rem; }
+
+  /* ── MATH GRID ── */
+  .math-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+  .math-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+  }
+  .math-cell .num {
+    font-family: var(--mono);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .math-cell .label { font-size: 0.82rem; color: var(--muted); line-height: 1.4; }
+
+  /* ── FORMULA BOX ── */
+  .formula {
+    background: var(--bg3);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    color: var(--accent2);
+    line-height: 1.8;
+  }
+
+  /* ── STEPS ── */
+  .steps { counter-reset: step; display: flex; flex-direction: column; gap: 1px; }
+  .step {
+    display: flex; gap: 1.25rem; align-items: flex-start;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 0.75rem;
+    transition: border-color 0.18s;
+  }
+  .step:hover { border-color: var(--accent2); }
+  .step-num {
+    font-family: var(--mono);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent2);
+    min-width: 2rem;
+    line-height: 1;
+    padding-top: 2px;
+  }
+  .step-body h3 { font-size: 1rem; font-weight: 600; color: var(--white); margin-bottom: 0.35rem; }
+  .step-body p { font-size: 0.9rem; color: #999; line-height: 1.6; }
+  .step-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+  }
+  .tag-easy { background: rgba(78,205,196,0.12); color: var(--accent2); }
+  .tag-medium { background: rgba(245,166,35,0.12); color: var(--accent); }
+  .tag-hard { background: rgba(232,93,117,0.12); color: var(--accent3); }
+
+  /* ── ALGORITHMS TABLE ── */
+  .algo-section { margin-bottom: 2.5rem; }
+  .algo-section-title {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .algo-row {
+    display: grid;
+    grid-template-columns: 1fr 1.8fr 1fr;
+    gap: 1rem;
+    align-items: center;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.6rem;
+    transition: border-color 0.18s;
+  }
+  .algo-row:hover { border-color: var(--border-hover); }
+  .algo-name { font-size: 0.95rem; font-weight: 500; color: var(--white); }
+  .algo-name span { display: block; font-size: 0.78rem; color: var(--muted); margin-top: 2px; font-weight: 400; }
+  .algo-moves {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--accent2);
+    line-height: 1.6;
+    word-break: break-word;
+  }
+  .algo-moves .sep { color: rgba(78,205,196,0.3); margin: 0 2px; }
+  .algo-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-align: center;
+    justify-self: end;
+  }
+  .badge-oll { background: rgba(245,166,35,0.15); color: var(--accent); }
+  .badge-pll { background: rgba(78,205,196,0.12); color: var(--accent2); }
+  .badge-f2l { background: rgba(232,93,117,0.12); color: var(--accent3); }
+  .badge-basic { background: rgba(255,255,255,0.07); color: var(--muted); }
+
+  /* ── CUBE FACE SVG ── */
+  .face-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; align-items: flex-start; }
+
+  /* ── NOTATION PILL ── */
+  .notation-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1rem 0; }
+  .notation-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.85rem;
+  }
+  .notation-pill code {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 22px;
+  }
+  .notation-pill span { font-size: 0.8rem; color: var(--muted); }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+  /* ── COPY BTN ── */
+  .copy-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); font-family: var(--mono); font-size: 10px;
+    padding: 3px 10px; border-radius: 5px; cursor: pointer;
+    transition: all 0.15s; letter-spacing: 0.05em;
+    justify-self: end;
+  }
+  .copy-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  @media (max-width: 580px) {
+    .algo-row { grid-template-columns: 1fr 1fr; }
+    .algo-badge { justify-self: start; }
+    .algo-moves { grid-column: 1 / -1; }
+    nav { padding: 0 1rem; }
+    .hero { padding: 2.5rem 1.25rem 2rem; }
+    .content { padding: 0 1.25rem 4rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="https://cubesolver.fun/">⬛ CubeSolver</a>
+  <div class="nav-links">
+    <button onclick="showPage('math')" id="btn-math" class="active">Learn the Math</button>
+    <button onclick="showPage('solve')" id="btn-solve">Learn to Solve</button>
+    <button onclick="showPage('algos')" id="btn-algos">Cube Algorithms</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════ PAGE 1: LEARN THE MATH -->
+<div class="page active" id="page-math">
+  <div class="hero">
+    <div class="hero-tag">Chapter 01 — Group Theory</div>
+    <h1>The Math Behind<br>the Cube</h1>
+    <p>The Rubik's Cube is one of the richest objects in combinatorics and group theory. Understanding the numbers makes solving feel less like memorization and more like science.</p>
+  </div>
+  <div class="content">
+
+    <div class="math-grid">
+      <div class="math-cell">
+        <div class="num">43 <span style="font-size:1.1rem">quintillion</span></div>
+        <div class="label">Distinct permutations of a standard 3×3×3 cube</div>
+      </div>
+      <div class="math-cell">
+        <div class="num">20</div>
+        <div class="label">Maximum moves needed to solve any position (God's Number)</div>
+      </div>
+      <div class="math-cell">
+        <div class="num">43,252,003,274,489,856,000</div>
+        <div class="label" style="font-size:0.75rem">The exact number of possible states</div>
+      </div>
+      <div class="math-cell">
+        <div class="num">6</div>
+        <div class="label">Independent face layers — each a generator of the cube group</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>How many positions exist?</h2>
+      <p>A cube has <strong style="color:var(--white)">8 corners</strong>, each with 3 orientations, and <strong style="color:var(--white)">12 edges</strong>, each with 2 orientations. Not all combinations are reachable, so we divide out invalid states.</p>
+      <div class="formula">
+        (8! × 3⁸ × 12! × 2¹²) / 12
+        = 43,252,003,274,489,856,000
+      </div>
+      <p>The ÷12 accounts for three constraints: you can never have exactly one pair of swapped edges, exactly one pair of swapped corners, or a single flipped edge in isolation. These are the parity rules.</p>
+    </div>
+
+    <div class="card">
+      <h2>The Cube Group</h2>
+      <p>In abstract algebra, every valid sequence of moves forms a mathematical <em style="color:var(--accent2)">group</em> called G — the Rubik's Cube group. Its order (size) is exactly the 43 quintillion number above.</p>
+      <p>Each face turn is a <strong style="color:var(--white)">permutation</strong> of 20 moving pieces. Composing two moves means applying one permutation after another — this is group multiplication. The identity element is the solved state (do nothing).</p>
+      <div class="formula">
+        G = &lt; U, D, F, B, R, L &gt;
+        |G| = 43,252,003,274,489,856,000
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Parity</h2>
+      <p>Parity is why you can never swap just two pieces. Every legal move is an even permutation overall — so the set of reachable positions is a subgroup of the symmetric group. This halves the number of valid corner states and halves the edge states, and a third constraint halves the orientation states, giving the ÷12 divisor.</p>
+      <p>Parity explains the classic frustration: getting 99% solved only to find two edges swapped — that configuration is simply unreachable from a fully assembled cube without disassembling it.</p>
+    </div>
+
+    <div class="card">
+      <h2>God's Number — the diameter of the group</h2>
+      <p>In 2010, a team using 35 CPU-years of computation proved that <strong style="color:var(--white)">every</strong> one of the 43 quintillion positions can be solved in at most <strong style="color:var(--accent)">20 moves</strong> (in the Half-Turn Metric). This upper bound is called God's Number — the maximum distance from the solved state across the entire group graph.</p>
+      <p>There are exactly <strong style="color:var(--white)">490 million</strong> positions that require exactly 20 moves. The average position requires about 18 moves to solve optimally.</p>
+    </div>
+
+    <div class="card">
+      <h2>Commutators &amp; Conjugates</h2>
+      <p>Most human speedsolving algorithms are built from two algebraic structures:</p>
+      <p><strong style="color:var(--accent2)">Commutator</strong> [A, B] = A B A⁻¹ B⁻¹ — applies A, then B, then undoes A, then undoes B. The result targets a small set of pieces while leaving the rest untouched.</p>
+      <p><strong style="color:var(--accent)">Conjugate</strong> A B A⁻¹ — sets up a piece into position (A), does an operation (B), then restores (A⁻¹). This is the backbone of intuitive F2L and corner-insertion techniques.</p>
+      <div class="formula">
+        [R, U] = R U R' U'  — 3-cycle of corners
+        [M, U] = M U M' U' — edge 3-cycle in M-slice
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ PAGE 2: LEARN TO SOLVE -->
+<div class="page" id="page-solve">
+  <div class="hero">
+    <div class="hero-tag">Chapter 02 — Method</div>
+    <h1>Learn to Solve<br>the Cube</h1>
+    <p>The beginner layer-by-layer method breaks an impossible puzzle into seven manageable steps. Each step has a clear goal and a small set of moves to learn.</p>
+  </div>
+  <div class="content">
+
+    <div class="card" style="margin-bottom:2rem">
+      <h3>Notation Reference</h3>
+      <div class="notation-grid">
+        <div class="notation-pill"><code>U</code><span>Top clockwise</span></div>
+        <div class="notation-pill"><code>U'</code><span>Top counter-CW</span></div>
+        <div class="notation-pill"><code>D</code><span>Bottom CW</span></div>
+        <div class="notation-pill"><code>F</code><span>Front CW</span></div>
+        <div class="notation-pill"><code>F'</code><span>Front counter-CW</span></div>
+        <div class="notation-pill"><code>R</code><span>Right CW</span></div>
+        <div class="notation-pill"><code>R'</code><span>Right counter-CW</span></div>
+        <div class="notation-pill"><code>L</code><span>Left CW</span></div>
+        <div class="notation-pill"><code>B</code><span>Back CW</span></div>
+        <div class="notation-pill"><code>2</code><span>Half turn (180°)</span></div>
+      </div>
+      <p style="margin-top:0.5rem">Hold the cube with <strong style="color:var(--white)">green facing you</strong> and <strong style="color:var(--white)">white on top</strong> throughout.</p>
+    </div>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <h3>White Cross</h3>
+          <p>Build a cross on the white face — four edge pieces with white on top and each side colour matching its centre. Solve intuitively by rotating each white edge from the bottom layer up.</p>
+          <div><span class="step-tag tag-easy">Intuitive</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <h3>White Corners (F2L bottom layer)</h3>
+          <p>Insert the four white corner pieces to complete the first layer. Find a white corner in the bottom layer beneath its target slot, then use the <strong style="color:var(--accent2)">Right Trigger</strong>: <code style="color:var(--accent)">R U R' U'</code>. Repeat until the corner drops in.</p>
+          <div><span class="step-tag tag-easy">1 algorithm</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <h3>Middle Layer Edges</h3>
+          <p>Insert the four middle-layer edges (they have no yellow). Align the edge on the top, then use either the <strong style="color:var(--accent2)">Right Insert</strong> or <strong style="color:var(--accent2)">Left Insert</strong> depending on whether the piece goes right or left.</p>
+          <div class="formula" style="margin:0.75rem 0 0.25rem; font-size:0.78rem">
+            Right: U R U' R' U' F' U F<br>
+            Left:  U' L' U L U F U' F'
+          </div>
+          <div><span class="step-tag tag-easy">2 algorithms</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <h3>Yellow Cross (OLL part 1)</h3>
+          <p>Orient the top layer edges to make a yellow cross. Look at the top face: if you see a dot, line, or L-shape, apply <strong style="color:var(--accent)">F R U R' U' F'</strong>. Repeat as needed — at most 3 times.</p>
+          <div class="formula" style="margin:0.75rem 0 0.25rem; font-size:0.78rem">F R U R' U' F'</div>
+          <div><span class="step-tag tag-medium">1 algorithm</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <h3>Orient Yellow Corners (OLL part 2)</h3>
+          <p>Get all yellow stickers facing up. Hold any non-yellow corner in the front-right position, then spam the Sune algorithm until that corner is correct, then turn U to bring the next misoriented corner to front-right. Never turn U while mid-algorithm.</p>
+          <div class="formula" style="margin:0.75rem 0 0.25rem; font-size:0.78rem">R U R' U R U2 R' (Sune)</div>
+          <div><span class="step-tag tag-medium">1 algorithm</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">06</div>
+        <div class="step-body">
+          <h3>Permute Yellow Corners (PLL part 1)</h3>
+          <p>Get all corners in their correct positions (colors matching sides, even if top still needs fixing). Look for two corners that are already correct relative to each other — hold them in the back, then apply the headlights algorithm.</p>
+          <div class="formula" style="margin:0.75rem 0 0.25rem; font-size:0.78rem">R U' R U R U R U' R' U' R2</div>
+          <div><span class="step-tag tag-medium">1 algorithm</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">07</div>
+        <div class="step-body">
+          <h3>Permute Yellow Edges (PLL part 2)</h3>
+          <p>Cycle the top-layer edges into place. One face will likely already be solved — hold it toward you, then apply the edge cycle below. If no face is solved, apply the algorithm once first.</p>
+          <div class="formula" style="margin:0.75rem 0 0.25rem; font-size:0.78rem">F2 U L R' F2 L' R U F2</div>
+          <div><span class="step-tag tag-hard">1 algorithm — you're done!</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <hr class="divider" />
+
+    <div class="card">
+      <h2>Next: CFOP Speedsolving</h2>
+      <p>Once comfortable with the beginner method, speedsolvers move to <strong style="color:var(--white)">CFOP</strong> (Cross, F2L, OLL, PLL). Instead of steps 2–3 above, all four middle pairs are solved simultaneously using 41 pattern-recognition cases. Full OLL has 57 cases and full PLL has 21 — but you can learn just 2-look versions first.</p>
+      <p>Visit the <strong style="color:var(--accent2)">Cube Algorithms</strong> page for the full OLL and PLL algorithm sets.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ PAGE 3: CUBE ALGORITHMS -->
+<div class="page" id="page-algos">
+  <div class="hero">
+    <div class="hero-tag">Chapter 03 — Reference</div>
+    <h1>Cube Algorithms</h1>
+    <p>A curated reference of essential move sequences for CFOP solving. Click any algorithm to copy it to your clipboard.</p>
+  </div>
+  <div class="content">
+
+    <!-- BASIC -->
+    <div class="algo-section">
+      <div class="algo-section-title">Fundamentals</div>
+
+      <div class="algo-row">
+        <div class="algo-name">Right Trigger<span>Cornerstone of F2L</span></div>
+        <div class="algo-moves">R <span class="sep">·</span> U <span class="sep">·</span> R' <span class="sep">·</span> U'</div>
+        <button class="copy-btn" onclick="copyAlgo(this,'R U R\' U\'')">COPY</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">Left Trigger<span>Mirror of right trigger</span></div>
+        <div class="algo-moves">L' <span class="sep">·</span> U' <span class="sep">·</span> L <span class="sep">·</span> U</div>
+        <button class="copy-btn" onclick="copyAlgo(this,'L\' U\' L U')">COPY</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">Sexy Move<span>4-move commutator</span></div>
+        <div class="algo-moves">R <span class="sep">·</span> U <span class="sep">·</span> R' <span class="sep">·</span> U'  <span class="sep" style="opacity:0.2">×6 = identity</span></div>
+        <button class="copy-btn" onclick="copyAlgo(this,'R U R\' U\'')">COPY</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">Sledgehammer<span>R'-D'-R-D family</span></div>
+        <div class="algo-moves">R' <span class="sep">·</span> F <span class="sep">·</span> R <span class="sep">·</span> F'</div>
+        <button class="copy-btn" onclick="copyAlgo(this,'R\' F R F\'')">COPY</button>
+      </div>
+    </div>
+
+    <!-- OLL -->
+    <div class="algo-section">
+      <div class="algo-section-title">OLL — Orient Last Layer (2-look)</div>
+
+      <div class="algo-row">
+        <div class="algo-name">Cross OLL<span>Dot → Line → Cross</span></div>
+        <div class="algo-moves">F <span class="sep">·</span> R <span class="sep">·</span> U <span class="sep">·</span> R' <span class="sep">·</span> U' <span class="sep">·</span> F'</div>
+        <button class="copy-btn badge-oll" onclick="copyAlgo(this,'F R U R\' U\' F\'')">OLL</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">Anti-Cross OLL<span>Back cross variant</span></div>
+        <div class="algo-moves">f <span class="sep">·</span> R <span class="sep">·</span> U <span class="sep">·</span> R' <span class="sep">·</span> U' <span class="sep">·</span> f'</div>
+        <button class="copy-btn badge-oll" onclick="copyAlgo(this,'f R U R\' U\' f\'')">OLL</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">Sune<span>Orient corners CW</span></div>
+        <div class="algo-moves">R <span class="sep">·</span> U <span class="sep">·</span> R' <span class="sep">·</span> U <span class="sep">·</span> R <span class="sep">·</span> U2 <span class="sep">·</span> R'</div>
+        <button class="copy-btn badge-oll" onclick="copyAlgo(this,'R U R\' U R U2 R\'')">OLL</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">Anti-Sune<span>Orient corners CCW</span></div>
+        <div class="algo-moves">R <span class="sep">·</span> U2 <span class="sep">·</span> R' <span class="sep">·</span> U' <span class="sep">·</span> R <span class="sep">·</span> U' <span class="sep">·</span> R'</div>
+        <button class="copy-btn badge-oll" onclick="copyAlgo(this,'R U2 R\' U\' R U\' R\'')">OLL</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">OLL 21 — Headlights<span>All corners bad</span></div>
+        <div class="algo-moves">R <span class="sep">·</span> U2 <span class="sep">·</span> R' <span class="sep">·</span> U' <span class="sep">·</span> R <span class="sep">·</span> U <span class="sep">·</span> R' <span class="sep">·</span> U' <span class="sep">·</span> R <span class="sep">·</span> U' <span class="sep">·</span> R'</div>
+        <button class="copy-btn badge-oll" onclick="copyAlgo(this,'R U2 R\' U\' R U R\' U\' R U\' R\'')">OLL</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">OLL 57 — All edges flip<span>Pi / H case</span></div>
+        <div class="algo-moves">R <span class="sep">·</span> U <span class="sep">·</span> R' <span class="sep">·</span> U' <span class="sep">·</span> M' <span class="sep">·</span> U <span class="sep">·</span> R <span class="sep">·</span> U' <span class="sep">·</span> M</div>
+        <button class="copy-btn badge-oll" onclick="copyAlgo(this,'R U R\' U\' M\' U R U\' M')">OLL</button>
+      </div>
+    </div>
+
+    <!-- PLL -->
+    <div class="algo-section">
+      <div class="algo-section-title">PLL — Permute Last Layer (essential cases)</div>
+
+      <div class="algo-row">
+        <div class="algo-name">T-Perm<span>Swap 2 corners + 2 edges</span></div>
+        <div class="algo-moves">R U R' U' R' F R2 U' R' U' R U R' F'</div>
+        <button class="copy-btn badge-pll" onclick="copyAlgo(this,'R U R\' U\' R\' F R2 U\' R\' U\' R U R\' F\'')">PLL</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">Y-Perm<span>Swap 2 corners + 2 edges (diagonal)</span></div>
+        <div class="algo-moves">F R U' R' U' R U R' F' R U R' U' R' F R F'</div>
+        <button class="copy-btn badge-pll" onclick="copyAlgo(this,'F R U\' R\' U\' R U R\' F\' R U R\' U\' R\' F R F\'')">PLL</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">U-Perm (a)<span>3-cycle edges clockwise</span></div>
+        <div class="algo-moves">R U' R U R U R U' R' U' R2</div>
+        <button class="copy-btn badge-pll" onclick="copyAlgo(this,'R U\' R U R U R U\' R\' U\' R2')">PLL</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">U-Perm (b)<span>3-cycle edges counter-CW</span></div>
+        <div class="algo-moves">R2 U R U R' U' R' U' R' U R'</div>
+        <button class="copy-btn badge-pll" onclick="copyAlgo(this,'R2 U R U R\' U\' R\' U\' R\' U R\'')">PLL</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">A-Perm (a)<span>3-cycle corners CW</span></div>
+        <div class="algo-moves">x R' U R' D2 R U' R' D2 R2 x'</div>
+        <button class="copy-btn badge-pll" onclick="copyAlgo(this,'x R\' U R\' D2 R U\' R\' D2 R2 x\'')">PLL</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">E-Perm<span>Swap opposite edges + corners</span></div>
+        <div class="algo-moves">x' R U' R' D R U R' D' R U R' D R U' R' D' x</div>
+        <button class="copy-btn badge-pll" onclick="copyAlgo(this,'x\' R U\' R\' D R U R\' D\' R U R\' D R U\' R\' D\' x')">PLL</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">Z-Perm<span>Swap all 4 edges (opposite)</span></div>
+        <div class="algo-moves">M' U M2 U M2 U M' U2 M2</div>
+        <button class="copy-btn badge-pll" onclick="copyAlgo(this,'M\' U M2 U M2 U M\' U2 M2')">PLL</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">H-Perm<span>Swap all 4 edges (adjacent)</span></div>
+        <div class="algo-moves">M2 U M2 U2 M2 U M2</div>
+        <button class="copy-btn badge-pll" onclick="copyAlgo(this,'M2 U M2 U2 M2 U M2')">PLL</button>
+      </div>
+    </div>
+
+    <!-- F2L -->
+    <div class="algo-section">
+      <div class="algo-section-title">F2L — First Two Layers (key insertions)</div>
+
+      <div class="algo-row">
+        <div class="algo-name">Basic Right Insert<span>Corner + edge aligned</span></div>
+        <div class="algo-moves">U R U' R'</div>
+        <button class="copy-btn badge-f2l" onclick="copyAlgo(this,'U R U\' R\'')">F2L</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">Basic Left Insert<span>Mirror case</span></div>
+        <div class="algo-moves">U' L' U L</div>
+        <button class="copy-btn badge-f2l" onclick="copyAlgo(this,'U\' L\' U L')">F2L</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">Split &amp; Insert Right<span>Edge in slot, corner on top</span></div>
+        <div class="algo-moves">U R U2 R' U R U' R'</div>
+        <button class="copy-btn badge-f2l" onclick="copyAlgo(this,'U R U2 R\' U R U\' R\'')">F2L</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">F2L #4 — Hiding trick<span>Corner in slot, edge on top</span></div>
+        <div class="algo-moves">R U' R' U2 F' U' F</div>
+        <button class="copy-btn badge-f2l" onclick="copyAlgo(this,'R U\' R\' U2 F\' U\' F')">F2L</button>
+      </div>
+
+      <div class="algo-row">
+        <div class="algo-name">Pair already paired<span>Both pieces together, wrong slot</span></div>
+        <div class="algo-moves">R U2 R' U' R U R'</div>
+        <button class="copy-btn badge-f2l" onclick="copyAlgo(this,'R U2 R\' U\' R U R\'')">F2L</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.getElementById('btn-' + id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function copyAlgo(btn, algo) {
+  navigator.clipboard.writeText(algo).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'COPIED';
+    btn.style.borderColor = '#4ecdc4';
+    btn.style.color = '#4ecdc4';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 1200);
+  });
+}
+</script>
+</body>
+</html>

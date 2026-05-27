@@ -39,6 +39,44 @@ body {
   gap: 20px;
 }
 
+/* Site nav */
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.site-nav-brand {
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+  color: var(--amber);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.site-nav-links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.site-nav-link {
+  padding: 5px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.site-nav-link:hover {
+  color: var(--text);
+  border-color: #555;
+}
+
 /* Header */
 header { text-align: center; }
 header h1 {
