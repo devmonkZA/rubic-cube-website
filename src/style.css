@@ -72,10 +72,9 @@ body {
   transition: color 0.15s, border-color 0.15s;
   white-space: nowrap;
 }
-.site-nav-link:hover {
-  color: var(--text);
-  border-color: #555;
-}
+.site-nav-link:hover { color: var(--text); border-color: #555; }
+.site-nav-highlight { color: var(--amber); border-color: var(--amber); }
+.site-nav-highlight:hover { color: var(--amber); border-color: var(--amber); filter: brightness(1.15); }
 
 /* Header */
 header { text-align: center; }

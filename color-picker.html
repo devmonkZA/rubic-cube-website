@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enter Your Cube — CubeSolver</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5423739587861491" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg:      #0f0f13;
+      --surface: #1a1a24;
+      --border:  #2e2e42;
+      --text:    #e8e8f0;
+      --muted:   #7070a0;
+      --amber:   #f59e0b;
+      --green:   #10b981;
+      --red:     #ef4444;
+
+      --col-white:  #ffffff;
+      --col-yellow: #ffd600;
+      --col-green:  #00c041;
+      --col-blue:   #0051c7;
+      --col-red:    #e8312a;
+      --col-orange: #ff7b00;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; }
+
+    .page { max-width: 780px; margin: 0 auto; padding: 24px 16px 64px; }
+
+    nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .nav-brand { font-weight: 700; font-size: 1rem; color: var(--amber); text-decoration: none; }
+    .nav-back  { font-size: 0.85rem; color: var(--muted); text-decoration: none; }
+    .nav-back:hover { color: var(--text); }
+
+    h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { font-size: 0.85rem; color: var(--muted); margin-bottom: 24px; }
+
+    /* ── Colour palette ── */
+    .palette-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+    .palette-label { font-size: 0.78rem; color: var(--muted); margin-right: 4px; }
+    .swatch {
+      width: 36px; height: 36px; border-radius: 6px; border: 3px solid transparent;
+      cursor: pointer; transition: border-color 0.1s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    .swatch:hover  { transform: scale(1.12); }
+    .swatch.active { border-color: var(--amber); transform: scale(1.12); }
+
+    /* ── Cube net ── */
+    .net-wrap { overflow-x: auto; margin-bottom: 24px; }
+    .net {
+      display: inline-grid;
+      grid-template-columns: repeat(12, 38px);
+      grid-template-rows: repeat(9, 38px);
+      gap: 2px;
+    }
+
+    .cell {
+      width: 38px; height: 38px; border-radius: 4px;
+      border: 2px solid rgba(255,255,255,0.12);
+      cursor: pointer;
+      transition: filter 0.1s, transform 0.08s;
+      position: relative;
+    }
+    .cell:hover { filter: brightness(1.3); transform: scale(1.08); z-index: 1; }
+    .cell.center {
+      cursor: default;
+      border-color: rgba(255,255,255,0.3);
+    }
+    .cell.center::after {
+      content: attr(data-label);
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: rgba(0,0,0,0.55);
+    }
+
+    /* ── Error / status ── */
+    #status-msg {
+      min-height: 24px; font-size: 0.85rem; margin-bottom: 16px;
+      color: var(--muted);
+    }
+    #status-msg.error { color: var(--red); }
+    #status-msg.ok    { color: var(--green); }
+
+    /* ── Count badges ── */
+    .counts { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .count-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 10px; font-size: 0.78rem;
+    }
+    .count-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+    .count-num { color: var(--text); font-weight: 600; }
+    .count-num.bad { color: var(--red); }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer;
+      font-size: 0.9rem; font-weight: 700; transition: opacity 0.15s, filter 0.15s;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-green  { background: #10b981; color: #fff; }
+    .btn-green:not(:disabled):hover { filter: brightness(1.1); }
+    .btn-ghost  { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-amber  { background: var(--amber); color: #0f0f13; }
+    .btn-amber:not(:disabled):hover { filter: brightness(1.1); }
+
+    .instructions { font-size: 0.8rem; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+    .instructions strong { color: var(--text); }
+  </style>
+</head>
+<body>
+<div class="page">
+  <nav>
+    <a href="./index.html" class="nav-brand">⬛ CubeSolver</a>
+    <a href="./index.html" class="nav-back">← Back to solver</a>
+  </nav>
+
+  <h1>Enter Your Cube</h1>
+  <p class="subtitle">Paint each sticker with its colour, then click Solve.</p>
+
+  <p class="instructions">
+    <strong>1.</strong> Click a colour in the palette below.<br>
+    <strong>2.</strong> Click (or drag across) stickers on the cube net to paint them.<br>
+    <strong>3.</strong> Hold the cube with <strong>White on top</strong> and <strong>Green facing you</strong> — the centre squares are fixed and show the face letter.<br>
+    <strong>4.</strong> Click <strong>Solve</strong> when all 54 stickers are filled correctly.
+  </p>
+
+  <!-- Colour palette -->
+  <div class="palette-row">
+    <span class="palette-label">Colour:</span>
+    <div class="swatch active" data-color="0" style="background:var(--col-white);border-color:var(--amber)" title="White (U)"></div>
+    <div class="swatch" data-color="1" style="background:var(--col-red)"    title="Red (R)"></div>
+    <div class="swatch" data-color="2" style="background:var(--col-green)"  title="Green (F)"></div>
+    <div class="swatch" data-color="3" style="background:var(--col-yellow)" title="Yellow (D)"></div>
+    <div class="swatch" data-color="4" style="background:var(--col-orange)" title="Orange (L)"></div>
+    <div class="swatch" data-color="5" style="background:var(--col-blue)"   title="Blue (B)"></div>
+  </div>
+
+  <!-- Cube net -->
+  <div class="net-wrap">
+    <div class="net" id="cube-net"></div>
+  </div>
+
+  <!-- Per-colour counts -->
+  <div class="counts" id="counts"></div>
+
+  <!-- Status -->
+  <div id="status-msg">Paint all 54 stickers, then click Solve.</div>
+
+  <!-- Action buttons -->
+  <div class="btn-row">
+    <button class="btn btn-green" id="btn-solve" disabled>✨ Solve</button>
+    <button class="btn btn-ghost" id="btn-reset">↺ Reset</button>
+    <button class="btn btn-amber" id="btn-solved-preset">⚡ Load Solved Cube</button>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+// Faces: U=0 R=1 F=2 D=3 L=4 B=5
+// Facelets: U=0-8, R=9-17, F=18-26, D=27-35, L=36-44, B=45-53
+
+const COLORS = [
+  { hex: 'var(--col-white)',  name: 'White'  },
+  { hex: 'var(--col-red)',    name: 'Red'    },
+  { hex: 'var(--col-green)',  name: 'Green'  },
+  { hex: 'var(--col-yellow)', name: 'Yellow' },
+  { hex: 'var(--col-orange)', name: 'Orange' },
+  { hex: 'var(--col-blue)',   name: 'Blue'   },
+];
+
+const CENTER_IDX = [4, 13, 22, 31, 40, 49]; // which facelet index is the center of each face
+
+// Initial state: solved cube (face i → color i for all stickers on that face)
+const facelets = Array.from({ length: 54 }, (_, i) => Math.floor(i / 9));
+
+let activePaint  = 0; // currently selected colour
+let isPainting   = false;
+
+// ── Net layout ─────────────────────────────────────────────────────────────
+// Grid is 12 cols × 9 rows (1-indexed). Each face occupies a 3×3 block.
+// col/row origin of each face:
+const FACE_ORIGINS = [
+  { col: 4, row: 1, label: 'U' }, // U face
+  { col: 7, row: 4, label: 'R' }, // R
+  { col: 4, row: 4, label: 'F' }, // F
+  { col: 4, row: 7, label: 'D' }, // D
+  { col: 1, row: 4, label: 'L' }, // L
+  { col:10, row: 4, label: 'B' }, // B
+];
+// Facelet absolute index = faceIndex*9 + cellIndex (0-8, row-major within face)
+
+const net   = document.getElementById('cube-net');
+const cells = []; // cells[faceIndex][cellIndex] = DOM element
+
+function buildNet() {
+  // Place all face cells in the grid
+  for (let f = 0; f < 6; f++) {
+    cells[f] = [];
+    const { col, row, label } = FACE_ORIGINS[f];
+    for (let ci = 0; ci < 9; ci++) {
+      const r = Math.floor(ci / 3); // row within face (0-2)
+      const c = ci % 3;             // col within face (0-2)
+      const absIdx = f * 9 + ci;
+
+      const el = document.createElement('div');
+      el.className = 'cell';
+      el.style.gridColumn = (col + c) + '';
+      el.style.gridRow    = (row + r) + '';
+      el.dataset.abs      = absIdx;
+
+      if (CENTER_IDX.includes(absIdx)) {
+        el.classList.add('center');
+        el.dataset.label = label;
+      }
+
+      el.addEventListener('mousedown', onCellDown);
+      el.addEventListener('mouseenter', onCellEnter);
+      cells[f].push(el);
+      net.appendChild(el);
+    }
+  }
+  document.addEventListener('mouseup', () => { isPainting = false; });
+}
+
+function onCellDown(e) {
+  e.preventDefault();
+  const absIdx = +e.currentTarget.dataset.abs;
+  if (CENTER_IDX.includes(absIdx)) return; // centres are fixed
+  isPainting = true;
+  paintCell(absIdx);
+}
+
+function onCellEnter(e) {
+  if (!isPainting) return;
+  const absIdx = +e.currentTarget.dataset.abs;
+  if (CENTER_IDX.includes(absIdx)) return;
+  paintCell(absIdx);
+}
+
+function paintCell(absIdx) {
+  facelets[absIdx] = activePaint;
+  renderCell(absIdx);
+  updateCounts();
+}
+
+function renderCell(absIdx) {
+  const f  = Math.floor(absIdx / 9);
+  const ci = absIdx % 9;
+  const el = cells[f][ci];
+  el.style.background = COLORS[facelets[absIdx]].hex;
+}
+
+function renderAll() {
+  for (let i = 0; i < 54; i++) renderCell(i);
+}
+
+// ── Counts ─────────────────────────────────────────────────────────────────
+const countsEl  = document.getElementById('counts');
+const statusEl  = document.getElementById('status-msg');
+const btnSolve  = document.getElementById('btn-solve');
+
+function updateCounts() {
+  const tally = [0, 0, 0, 0, 0, 0];
+  facelets.forEach(c => tally[c]++);
+
+  countsEl.innerHTML = COLORS.map((col, i) => {
+    const bad = tally[i] !== 9;
+    return `<div class="count-badge">
+      <div class="count-dot" style="background:${col.hex};${i===0?'border:1px solid #555':''}"></div>
+      <span class="${bad ? 'count-num bad' : 'count-num'}">${tally[i]}/9</span>
+    </div>`;
+  }).join('');
+
+  const allNine = tally.every(n => n === 9);
+  btnSolve.disabled = !allNine;
+  if (allNine) {
+    statusEl.textContent = 'Looks good! Click Solve to find the solution.';
+    statusEl.className   = 'ok';
+  } else {
+    const remaining = 54 - tally.reduce((a, b) => a + b, 0);
+    statusEl.textContent = remaining > 0
+      ? `${remaining} sticker${remaining > 1 ? 's' : ''} still unpainted.`
+      : 'Each colour must appear exactly 9 times.';
+    statusEl.className = '';
+  }
+}
+
+// ── Palette selection ───────────────────────────────────────────────────────
+document.querySelectorAll('.swatch').forEach(sw => {
+  sw.addEventListener('click', () => {
+    document.querySelectorAll('.swatch').forEach(s => {
+      s.classList.remove('active');
+      s.style.borderColor = 'transparent';
+    });
+    sw.classList.add('active');
+    sw.style.borderColor = 'var(--amber)';
+    activePaint = +sw.dataset.color;
+  });
+});
+
+// ── Reset ───────────────────────────────────────────────────────────────────
+document.getElementById('btn-reset').addEventListener('click', () => {
+  for (let i = 0; i < 54; i++) facelets[i] = Math.floor(i / 9);
+  renderAll();
+  updateCounts();
+});
+
+// ── Load solved preset ──────────────────────────────────────────────────────
+document.getElementById('btn-solved-preset').addEventListener('click', () => {
+  for (let i = 0; i < 54; i++) facelets[i] = Math.floor(i / 9);
+  renderAll();
+  updateCounts();
+});
+
+// ── Solve ───────────────────────────────────────────────────────────────────
+btnSolve.addEventListener('click', () => {
+  localStorage.setItem('customCubeState', JSON.stringify(facelets));
+  window.location.href = './index.html';
+});
+
+// ── Boot ────────────────────────────────────────────────────────────────────
+buildNet();
+renderAll();
+updateCounts();
+</script>
+</body>
+</html>
