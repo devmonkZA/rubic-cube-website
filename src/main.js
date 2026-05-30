@@ -117,7 +117,6 @@ function renderChips() {
     chip.textContent = move;
     if (i < currentStep)       chip.classList.add("done");
     if (i === currentStep - 1) chip.classList.add("active");
-    chip.addEventListener("click", () => jumpToStep(i + 1));
     solutionChips.appendChild(chip);
   });
   const active = solutionChips.querySelector(".active");

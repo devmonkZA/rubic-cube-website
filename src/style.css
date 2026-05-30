@@ -253,11 +253,9 @@ header h1 {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--muted);
-  cursor: pointer;
   transition: background 0.1s, color 0.1s, border-color 0.1s;
   user-select: none;
 }
-.chip:hover { color: var(--text); border-color: #555; }
 .chip.done  { background: var(--chip-done); color: var(--text); border-color: #3a3a50; }
 .chip.active {
   background: var(--amber);
