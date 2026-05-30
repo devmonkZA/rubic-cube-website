@@ -11,8 +11,10 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, "index.html"),
-        learn: resolve(__dirname, "learn.html"),
+        main:         resolve(__dirname, "index.html"),
+        learn:        resolve(__dirname, "learn.html"),
+        cubePages:    resolve(__dirname, "cube-pages.html"),
+        colorPicker:  resolve(__dirname, "color-picker.html"),
       },
     },
   },
