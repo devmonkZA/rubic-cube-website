@@ -2,6 +2,7 @@ import { TwistyPlayer } from "cubing/twisty";
 import { randomScrambleForEvent } from "cubing/scramble";
 import { KPuzzle, experimentalCube3x3x3KPuzzle } from "cubing/kpuzzle";
 import { experimentalSolve3x3x3IgnoringCenters } from "cubing/search";
+import videos from "./videos.json";
 
 // ─── DOM ─────────────────────────────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
@@ -325,5 +326,27 @@ document.addEventListener("keydown", (e) => {
   else if (e.key === " ")         { e.preventDefault(); togglePlay(); }
 });
 
+// ─── YouTube video cards ──────────────────────────────────────────────────────
+function renderVideos() {
+  const left  = document.getElementById("video-col-left");
+  const right = document.getElementById("video-col-right");
+  videos.forEach((v, i) => {
+    const col   = i < 2 ? left : right;
+    const thumb = `https://img.youtube.com/vi/${v.youtube_id}/mqdefault.jpg`;
+    const url   = `https://www.youtube.com/watch?v=${v.youtube_id}`;
+    const card  = document.createElement("a");
+    card.className   = "video-card";
+    card.href        = url;
+    card.target      = "_blank";
+    card.rel         = "noopener noreferrer";
+    card.innerHTML   = `
+      <img class="video-thumb" src="${thumb}" alt="${v.title}" loading="lazy" />
+      <span class="video-title">${v.title}</span>
+      <span class="video-btn">&#9654; Watch</span>`;
+    col.appendChild(card);
+  });
+}
+
 // ─── Boot ─────────────────────────────────────────────────────────────────────
+renderVideos();
 initPlayer();
